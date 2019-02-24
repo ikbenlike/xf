@@ -117,7 +117,6 @@ Func *compile(char *name, Metadata *md){
         return NULL;
     }
     while(true){
-        puts("compile while");
         char *word = get_word(md->stream);
         if(word == NULL){
             printf("Error while compiling `%s`.\n", name);
