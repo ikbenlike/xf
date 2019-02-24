@@ -48,18 +48,14 @@ Funcvector *init_fv(size_t size){
 }
 
 Funcvector *append_fv(Funcvector *fv, Func f){
-    puts("append_fv");
     if(fv->index + 1 < fv->size){
-        puts("yeah");
         fv->array[fv->index++] = f;
         return fv;
     }
-    puts("nah");
 
     size_t ns = fv->size + 32;
     Func *tmp = realloc(fv->array, ns * sizeof(Func));
     if(tmp == NULL){
-        puts("append NULL");
         return NULL;
     }
     fv->array = tmp;
@@ -130,7 +126,6 @@ Func *compile(char *name, Metadata *md){
         switch(classify_word(word)){
             case Default: {
                 if(handle_default(md, fv, name, word) == NULL){
-                    puts("NULL");
                     free(word);
                     return NULL;
                 }
@@ -142,7 +137,6 @@ Func *compile(char *name, Metadata *md){
             }
             case Number: {
                 if(handle_number(md, fv, name, word) == NULL){
-                    puts("NULL");
                     free(word);
                     return NULL;
                 }
