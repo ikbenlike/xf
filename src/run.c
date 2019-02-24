@@ -13,16 +13,12 @@
 #include "run.h"
 
 void execute(Metadata *md){
-    puts("execute");
     while(true){
-        puts("while");
         Func *tmp = pop(RStack)(md->rstack);
-        printf("tmp %p\n", tmp);
         push(RStack)(md->rstack, tmp + 1);
-        if(*tmp == NULL){
-            puts("frick");
+        if(*tmp == &none){
+            return;
         }
-        printf("running %p\n", *tmp);
         (*tmp)(md);
     }
 }

@@ -13,7 +13,6 @@
 #include "init_kernel.h"
 
 int main(int argc, char **argv){
-    puts("cl");
     Metadata *md = calloc(1, sizeof(Metadata));
 
     Stack *stack = calloc(1, sizeof(Stack));

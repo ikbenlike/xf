@@ -3,5 +3,6 @@
 
     Wordlist *init_kernel();
     bool is_primitive(Func fn);
+    void none(Metadata *md);
 
 #endif

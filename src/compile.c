@@ -34,7 +34,7 @@ bool word_is_primitive(Wordlist *wl, char *word){
 }
 
 Funcvector *init_fv(size_t size){
-    Funcvector *fv = calloc(1, sizeof(fv));
+    Funcvector *fv = calloc(1, sizeof(Funcvector));
     if(fv == NULL){
         return NULL;
     }
@@ -57,7 +57,7 @@ Funcvector *append_fv(Funcvector *fv, Func f){
     puts("nah");
 
     size_t ns = fv->size + 32;
-    Func *tmp = realloc(fv->array, ns);
+    Func *tmp = realloc(fv->array, ns * sizeof(Func));
     if(tmp == NULL){
         puts("append NULL");
         return NULL;

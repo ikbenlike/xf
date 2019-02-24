@@ -49,9 +49,7 @@ void blank(Metadata *md){
 
 void emit(Metadata *md){
     Cell n = pop(Stack)(md->stack);
-    if(isascii(n)){
-        putchar(n);
-    }
+    putchar(n);
 }
 
 void colon(Metadata *md){
@@ -113,6 +111,10 @@ void docolon(Metadata *md){
     push(RStack)(md->rstack, tmp + 1);
     Func *w = (Func*)*tmp;
     push(RStack)(md->rstack, w);
+}
+
+void none(Metadata *md){
+    return;
 }
 
 Wordlist *init_kernel(){
@@ -198,6 +200,7 @@ Wordlist *init_kernel(){
     wordlist_set(wl, MAKE_PRIM("swap", &swap));
     wordlist_set(wl, MAKE_PRIM("quit", &repl));
     wordlist_set(wl, MAKE_PRIM("docolon", &docolon));
+    wordlist_set(wl, MAKE_PRIM("none", &none));
     return wl;
 }
 

@@ -1,1 +1,3 @@
 *.exe
+vgcore.*
+bin/*

@@ -9,7 +9,7 @@
 #include "wordlist.h"
 
 char *upcase_string(char *s){
-    size_t ss = strlen(s);
+    size_t ss = strlen(s) + 1;
     char *r = calloc(ss, sizeof(char));
     for(size_t i = 0; i < ss; i++){
         r[i] = (char)toupper((int)s[i]);

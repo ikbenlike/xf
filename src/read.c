@@ -35,7 +35,7 @@ char *downsize_buffer(char *buffer, size_t *s, size_t index){
         if(tmp == NULL){
             return buffer;
         }
-        *s = size - diff + 1;
+        *s = size - diff;
         tmp[*s] = '\0';
         return tmp;
     }

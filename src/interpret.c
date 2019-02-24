@@ -28,15 +28,17 @@ void repl(Metadata *md){
                         fn(md);
                     }
                     else{
-                        Func *x = calloc(2, sizeof(Func));
+                        Func *x = calloc(3, sizeof(Func));
                         if(x == NULL){
                             puts("Internal error.");
                             break;
                         }
                         x[0] = get_xt_from_word(md->wl, "docolon");
                         x[1] = fn;
+                        x[2] = &none;
                         push(RStack)(md->rstack, x);
                         execute(md);
+                        free(x);
                     }
                 }
             }
