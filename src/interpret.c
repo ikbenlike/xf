@@ -12,6 +12,14 @@
 #include "init_kernel.h"
 #include "run.h"
 
+void load_file(Metadata *md, char *path){
+    FILE *before = md->stream;
+    md->stream = fopen(path, "r");
+    repl(md);
+    fclose(md->stream);
+    md->stream = before;
+}
+
 void repl(Metadata *md){
     char *word;
     enum Type type;

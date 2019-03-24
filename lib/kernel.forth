@@ -6,3 +6,10 @@
 : nip swap drop ;
 : tuck swap over ;
 : rdrop r> drop ;
+: negate -1 * ;
+: negative? 0 > ;
+: square dup * ;
+: ( 41 parse 2drop ;
+: .( 41 parse type ;
+: s" 34 parse ;
+: ." 34 parse type ;

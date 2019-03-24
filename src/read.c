@@ -81,3 +81,32 @@ enum Type classify_word(char *word){
 
     return Number;
 }
+
+char *parse(FILE *stream, char test, size_t *length){
+    size_t size = 512;
+    const size_t increment = size;
+    char *buffer = calloc(size, sizeof(char));
+    size_t i = 0;
+    for(int c = getc(stream); c != EOF && (char)c != test; c = getc(stream)){
+        buffer[i++] = (char)c;
+        if(i == size){
+            char *tmp = realloc(buffer, size + increment);
+            if(!tmp){
+                *length = i;
+                return buffer;
+            }
+            buffer = tmp;
+            memset(buffer + size, 0, increment);
+            size += increment;
+        }
+    }
+    size_t l = strlen(buffer);
+    char *tmp = realloc(buffer, size - (size - l));
+    if(!tmp){
+        *length = size;
+        return buffer;
+    }
+    buffer = tmp;
+    *length = l;
+    return buffer;
+}

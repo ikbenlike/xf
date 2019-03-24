@@ -8,5 +8,6 @@
 
     char *get_word(FILE *stream);
     enum Type classify_word(char *word);
+    char *parse(FILE *stream, char test, size_t *length);
 
 #endif
