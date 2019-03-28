@@ -6,6 +6,7 @@
     struct Word;
     struct Wordlist;
 
+
     enum Mode {
         Interpret_Mode = 0,
         Compiler_Mode = 1,
@@ -20,8 +21,13 @@
         struct Wordlist *wl;
     } Metadata;
 
+    void i_docolon(struct Word *word, Metadata *md);
+    void i_literal(struct Word *word, Metadata *md);
+    void i_primitive(struct Word *word, Metadata *md);
+
     typedef int64_t Cell;
     typedef void(*Func)(Metadata*);
+    typedef void(*Interpreter)(struct Word*, Metadata*);
 
 #   define pop(WHICH) pop_ ## WHICH
 #   define push(WHICH) push_ ## WHICH
@@ -35,11 +41,11 @@
     typedef struct RStack {
         size_t size;
         size_t index;
-        Func **fn;
+        struct Word ***fn;
     } RStack;
 
     typedef struct Word {
-        bool primitive;
+        Interpreter interpreter;
         char *name;
         Func fn;
         bool immediate;
@@ -48,11 +54,11 @@
     Cell pop_Stack(Stack* stack);
     Stack *push_Stack(Stack *stack, Cell cell);
     Cell pick(Stack *stack, Cell n);
-    Func *pop_RStack(RStack *stack);
-    RStack *push_RStack(RStack *stack, Func *fn);
-    Word *make_word(char *name, Func fn, bool primitive);
+    Word **pop_RStack(RStack *stack);
+    RStack *push_RStack(RStack *stack, Word **fn);
+    Word *make_word(char *name, Func fn, Interpreter interpreter);
 
-#   define MAKE_WORD(NAME, FN) make_word(NAME, (Func)FN, false)
-#   define MAKE_PRIM(NAME, FN) make_word(NAME, FN, true)
+#   define MAKE_WORD(NAME, FN) make_word(NAME, (Func)FN, &i_docolon)
+#   define MAKE_PRIM(NAME, FN) make_word(NAME, FN, &i_primitive)
 
 #endif

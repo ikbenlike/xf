@@ -14,11 +14,13 @@
 
 void execute(Metadata *md){
     while(true){
-        Func *tmp = pop(RStack)(md->rstack);
-        push(RStack)(md->rstack, tmp + 1);
-        if(*tmp == &none){
+        puts("execute");
+        Word **w = pop(RStack)(md->rstack);
+        printf("w = %"PRId64"\n", (Cell)w);
+        push(RStack)(md->rstack, w + 1);
+        if(w == (Word**)&none){
             return;
         }
-        (*tmp)(md);
+        (*w)->interpreter(*w, md);
     }
 }

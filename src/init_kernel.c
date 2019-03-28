@@ -62,7 +62,7 @@ void colon(Metadata *md){
         puts("Invalid name for defined word.");
         return;
     }
-    Func *fs = compile(name, md);
+    Word **fs = compile(name, md);
     wordlist_set(md->wl, MAKE_WORD(name, fs));
     md->mode = Interpret_Mode;
 }
@@ -73,34 +73,34 @@ void semicolon(Metadata *md){
 
 void noname_colon(Metadata *md){
     md->mode = Compiler_Mode;
-    Func *fs = compile("noname", md);
+    Word **fs = compile("noname", md);
     md->mode = Interpret_Mode;
     push(Stack)(md->stack, (Cell)fs);
 }
 
 void literal(Metadata *md){
-    Func *n = pop(RStack)(md->rstack);
+    Word **n = pop(RStack)(md->rstack);
     push(RStack)(md->rstack, n + 1);
     push(Stack)(md->stack, (Cell)(*n));
 }
 
 void to_r(Metadata *md){
     Cell n = pop(Stack)(md->stack);
-    Func *tmp = pop(RStack)(md->rstack);
-    push(RStack)(md->rstack, (Func*)n);
+    Word **tmp = pop(RStack)(md->rstack);
+    push(RStack)(md->rstack, (Word**)n);
     push(RStack)(md->rstack, tmp);
 }
 
 void from_r(Metadata *md){
-    Func *tmp = pop(RStack)(md->rstack);
-    Func *n = pop(RStack)(md->rstack);
+    Word **tmp = pop(RStack)(md->rstack);
+    Word **n = pop(RStack)(md->rstack);
     push(RStack)(md->rstack, tmp);
     push(Stack)(md->stack, (Cell)n);
 }
 
 void fetch_r(Metadata *md){
-    Func *tmp = pop(RStack)(md->rstack);
-    Func *n = pop(RStack)(md->rstack);
+    Word **tmp = pop(RStack)(md->rstack);
+    Word **n = pop(RStack)(md->rstack);
     push(RStack)(md->rstack, n);
     push(RStack)(md->rstack, tmp);
     push(Stack)(md->stack, (Cell)n);
@@ -114,9 +114,9 @@ void swap(Metadata *md){
 }
 
 void docolon(Metadata *md){
-    Func *tmp = pop(RStack)(md->rstack);
+    Word **tmp = pop(RStack)(md->rstack);
     push(RStack)(md->rstack, tmp + 1);
-    Func *w = (Func*)*tmp;
+    Word **w = (Word**)*tmp;
     push(RStack)(md->rstack, w);
 }
 
@@ -131,11 +131,7 @@ void load(Metadata *md){
 
 void forth_exec(Metadata *md){
     Word *word = (Word*)pop(Stack)(md->stack);
-    if(word->primitive){
-        word->fn(md);
-        return;
-    }
-    docolon(md);
+    word->interpreter(word, md);
 }
 
 void tick(Metadata *md){
@@ -208,5 +204,6 @@ Wordlist *init_kernel(){
     wordlist_set(wl, MAKE_PRIM("free", &forth_free));
     wordlist_set(wl, MAKE_PRIM("char", &forth_char));
     wordlist_set(wl, MAKE_PRIM("noname:", &noname_colon));
+    wordlist_set(wl, MAKE_PRIM("repl", &repl));
     return wl;
 }

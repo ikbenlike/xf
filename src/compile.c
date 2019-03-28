@@ -10,18 +10,18 @@
 #include "compile.h"
 
 typedef struct {
-    Func *array;
+    Word **array;
     size_t size;
     size_t index;
 } Funcvector;
 
-Func get_xt_from_word(Wordlist *wl, char *word){
+Word *get_xt_from_word(Wordlist *wl, char *word){
     Word *w = wordlist_get(wl, word);
     if(w == NULL){
         printf("Invalid {%s} word not found\n", word);
         return NULL;
     }
-    return w->fn;
+    return w;
 }
 
 bool word_is_primitive(Wordlist *wl, char *word){
@@ -30,7 +30,7 @@ bool word_is_primitive(Wordlist *wl, char *word){
         printf("Invalid {%s} word not primitive\n", word);
         return false;
     }
-    return w->primitive;
+    return (w->interpreter == &i_primitive);
 }
 
 Funcvector *init_fv(size_t size){
@@ -47,14 +47,14 @@ Funcvector *init_fv(size_t size){
     return fv;
 }
 
-Funcvector *append_fv(Funcvector *fv, Func f){
+Funcvector *append_fv(Funcvector *fv, Word *f){
     if(fv->index + 1 < fv->size){
         fv->array[fv->index++] = f;
         return fv;
     }
 
     size_t ns = fv->size + 32;
-    Func *tmp = realloc(fv->array, ns * sizeof(Func));
+    Word **tmp = realloc(fv->array, ns * sizeof(Func));
     if(tmp == NULL){
         return NULL;
     }
@@ -70,7 +70,7 @@ Funcvector *crop_fv(Funcvector *fv){
     if(fv->size - 1 == fv->index){
         return fv;
     }
-    Func *tmp = realloc(fv->array, sizeof(Func) * (fv->index + 1));
+    Word **tmp = realloc(fv->array, sizeof(Func) * (fv->index + 1));
     if(tmp == NULL){
         return NULL;
     }
@@ -80,8 +80,12 @@ Funcvector *crop_fv(Funcvector *fv){
 }
 
 Funcvector *handle_default(Metadata *md, Funcvector *fv, char *name, char *word){
-    Func xt = get_xt_from_word(md->wl, word);
-    if(word_is_primitive(md->wl, word)){
+    Word *xt = get_xt_from_word(md->wl, word);
+    if(append_fv(fv, xt) == NULL){
+        printf("Fatal error while compiling `%s` into word `%s`.\n", word, name);
+        return NULL;
+    }
+    /*if(word_is_primitive(md->wl, word)){
         if(append_fv(fv, xt) == NULL){
             printf("Fatal error while compiling primitive `%s` into word `%s`.\n", word, name);
             return NULL;
@@ -92,26 +96,33 @@ Funcvector *handle_default(Metadata *md, Funcvector *fv, char *name, char *word)
             printf("Fatal error while compiling word `%s` into word `%s`.\n", word, name);
             return NULL;
         }
-    }
+    }*/
     return fv;
 }
 
 Funcvector *handle_number(Metadata *md, Funcvector *fv, char *name, char *word){
-    Func litxt = get_xt_from_word(md->wl, "LIT");
-    Func n = (Func)atoll(word);
+    /*Word *litxt = get_xt_from_word(md->wl, "LIT");
+    Word *n = (Word*)atoll(word);
     if(append_fv(fv, litxt) == NULL || append_fv(fv, n) == NULL){
         printf("Fatal error when adding literal `%s` to word `%s`.\n", word, name);
         return NULL;
-    }
+    }*/
+    Word *w = calloc(1, sizeof(Word));
+    w->interpreter = &i_literal;
+    w->fn = (Func)atoll(word);
+    Word **wp = calloc(1, sizeof(Word*));
+    wp[0] = w;
+    append_fv(fv, w);
     return fv;
 }
 
-Func *compile(char *name, Metadata *md){
+Word **compile(char *name, Metadata *md){
+    puts("compile");
     Funcvector *fv = init_fv(64);
     if(fv == NULL){
         printf("Fatal error while compiling word `%s`.\n", name);
     }
-    const Func scxt = get_xt_from_word(md->wl, ";");
+    const Word *scxt = get_xt_from_word(md->wl, ";");
     if(scxt == NULL){
         printf("Fatal error while compiling word `%s`.\n", name);
         return NULL;
@@ -155,7 +166,7 @@ compile_finish:
         free(fv);
         printf("Fatal error while compiling word `%s`.\n", name);
     }
-    Func *fs = fv->array;
+    Word **fs = fv->array;
     free(fv);
     return fs;
 }
