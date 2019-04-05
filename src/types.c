@@ -5,22 +5,27 @@
 #include <stdbool.h>
 
 #include "types.h"
+#include "run.h"
 
 void i_docolon(struct Word *word, Metadata *md){
-    puts("doc");
+    /*puts("doc");
     Word **tmp = pop(RStack)(md->rstack);
     push(RStack)(md->rstack, tmp + 1);
     Word **w = (Word**)*tmp;
-    push(RStack)(md->rstack, w);
+    push(RStack)(md->rstack, w);*/
+    push(RStack)(md->rstack, md->running);
+    md->running = word->def;
+    NEXT(md);
 }
 
 void i_literal(struct Word *word, Metadata *md){
-    puts("lit");
+    //puts("lit");
     push(Stack)(md->stack, (Cell)word->fn);
+    NEXT(md);
 }
 
 void i_primitive(struct Word *word, Metadata *md){
-    puts("prm");
+    //puts("prm");
     word->fn(md);
 }
 

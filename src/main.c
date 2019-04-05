@@ -22,6 +22,7 @@ int main(int argc, char **argv){
     RStack *rstack = calloc(1, sizeof(RStack));
     rstack->fn = calloc(64, sizeof(Func*));
     rstack->size = 64;
+    rstack->index = 1;
 
     md->stack = stack;
     md->rstack = rstack;

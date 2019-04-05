@@ -9,6 +9,7 @@
 #include "read.h"
 #include "wordlist.h"
 #include "compile.h"
+#include "run.h"
 #include "interpret.h"
 #include "init_kernel.h"
 
@@ -17,6 +18,7 @@
         Cell b = pop(Stack)(md->stack); \
         Cell a = pop(Stack)(md->stack); \
         push(Stack)(md->stack, a OPERATOR b); \
+        NEXT(md); \
     }
 
 DEFINE_MATH(forth_add, +)
@@ -32,27 +34,33 @@ DEFINE_MATH(forth_and, &)
 void forth_pick(Metadata *md){
     Cell n = pop(Stack)(md->stack);
     push(Stack)(md->stack, pick(md->stack, n));
+    NEXT(md);
 }
 
 void dot(Metadata *md){
     printf("%"PRId64" ", pop(Stack)(md->stack));
+    NEXT(md);
 }
 
 void cr(Metadata *md){
     putchar('\n');
+    NEXT(md);
 }
 
 void bye(Metadata *md){
     exit(0);
+    NEXT(md);
 }
 
 void blank(Metadata *md){
     push(Stack)(md->stack, (Cell)' ');
+    NEXT(md);
 }
 
 void emit(Metadata *md){
     Cell n = pop(Stack)(md->stack);
     putchar(n);
+    NEXT(md);
 }
 
 void colon(Metadata *md){
@@ -65,10 +73,12 @@ void colon(Metadata *md){
     Word **fs = compile(name, md);
     wordlist_set(md->wl, MAKE_WORD(name, fs));
     md->mode = Interpret_Mode;
+    NEXT(md);
 }
 
 void semicolon(Metadata *md){
-    pop(RStack)(md->rstack);
+    md->running = pop(RStack)(md->rstack);
+    NEXT(md);
 }
 
 void noname_colon(Metadata *md){
@@ -76,19 +86,21 @@ void noname_colon(Metadata *md){
     Word **fs = compile("noname", md);
     md->mode = Interpret_Mode;
     push(Stack)(md->stack, (Cell)fs);
+    NEXT(md);
 }
 
-void literal(Metadata *md){
+/*void literal(Metadata *md){
     Word **n = pop(RStack)(md->rstack);
     push(RStack)(md->rstack, n + 1);
     push(Stack)(md->stack, (Cell)(*n));
-}
+}*/
 
 void to_r(Metadata *md){
     Cell n = pop(Stack)(md->stack);
     Word **tmp = pop(RStack)(md->rstack);
     push(RStack)(md->rstack, (Word**)n);
     push(RStack)(md->rstack, tmp);
+    NEXT(md);
 }
 
 void from_r(Metadata *md){
@@ -96,6 +108,7 @@ void from_r(Metadata *md){
     Word **n = pop(RStack)(md->rstack);
     push(RStack)(md->rstack, tmp);
     push(Stack)(md->stack, (Cell)n);
+    NEXT(md);
 }
 
 void fetch_r(Metadata *md){
@@ -104,13 +117,16 @@ void fetch_r(Metadata *md){
     push(RStack)(md->rstack, n);
     push(RStack)(md->rstack, tmp);
     push(Stack)(md->stack, (Cell)n);
+    NEXT(md);
 }
 
 void swap(Metadata *md){
+    puts("swap");
     Cell b = pop(Stack)(md->stack);
     Cell a = pop(Stack)(md->stack);
     push(Stack)(md->stack, b);
     push(Stack)(md->stack, a);
+    NEXT(md);
 }
 
 void docolon(Metadata *md){
@@ -118,6 +134,7 @@ void docolon(Metadata *md){
     push(RStack)(md->rstack, tmp + 1);
     Word **w = (Word**)*tmp;
     push(RStack)(md->rstack, w);
+    NEXT(md);
 }
 
 void load(Metadata *md){
@@ -127,17 +144,20 @@ void load(Metadata *md){
     strncpy(path, (char*)addr, length);
     load_file(md, path);
     free(path);
+    NEXT(md);
 }
 
 void forth_exec(Metadata *md){
     Word *word = (Word*)pop(Stack)(md->stack);
     word->interpreter(word, md);
+    NEXT(md);
 }
 
 void tick(Metadata *md){
     char *word = get_word(md->stream);
     //Func fn = get_xt_from_word(md->wl, word);
     push(Stack)(md->stack, (Cell)wordlist_get(md->wl, word));
+    NEXT(md);
 }
 
 void forth_parse(Metadata *md){
@@ -146,6 +166,7 @@ void forth_parse(Metadata *md){
     char *buffer = parse(md->stream, test, &length);
     push(Stack)(md->stack, (Cell)buffer);
     push(Stack)(md->stack, (Cell)length);
+    NEXT(md);
 }
 
 void type(Metadata *md){
@@ -154,20 +175,28 @@ void type(Metadata *md){
     for(size_t i = 0; i < length; i++){
         putchar((int)addr[i]);
     }
+    NEXT(md);
 }
 
 void forth_free(Metadata *md){
     void *addr = (void*)pop(Stack)(md->stack);
     free(addr);
+    NEXT(md);
 }
 
 void forth_char(Metadata *md){
     int c = getc(md->stream);
     push(Stack)(md->stack, (Cell)c);
+    NEXT(md);
 }
 
 void none(Metadata *md){
+    //puts("none");
     return;
+}
+
+void drop(Metadata *md){
+    pop(Stack)(md->stack);
 }
 
 Wordlist *init_kernel(){
@@ -189,7 +218,7 @@ Wordlist *init_kernel(){
     wordlist_set(wl, MAKE_PRIM("emit", &emit));
     wordlist_set(wl, MAKE_PRIM(":", &colon));
     wordlist_set(wl, MAKE_PRIM(";", &semicolon));
-    wordlist_set(wl, MAKE_PRIM("lit", &literal));
+    //wordlist_set(wl, MAKE_PRIM("lit", &literal));
     wordlist_set(wl, MAKE_PRIM(">r", &to_r));
     wordlist_set(wl, MAKE_PRIM("r>", &from_r));
     wordlist_set(wl, MAKE_PRIM("r@", &fetch_r));
@@ -205,5 +234,7 @@ Wordlist *init_kernel(){
     wordlist_set(wl, MAKE_PRIM("char", &forth_char));
     wordlist_set(wl, MAKE_PRIM("noname:", &noname_colon));
     wordlist_set(wl, MAKE_PRIM("repl", &repl));
+    wordlist_set(wl, MAKE_PRIM("none", &none));
+    wordlist_set(wl, MAKE_PRIM("drop", &drop));
     return wl;
 }

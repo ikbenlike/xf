@@ -117,7 +117,7 @@ Funcvector *handle_number(Metadata *md, Funcvector *fv, char *name, char *word){
 }
 
 Word **compile(char *name, Metadata *md){
-    puts("compile");
+    //puts("compile");
     Funcvector *fv = init_fv(64);
     if(fv == NULL){
         printf("Fatal error while compiling word `%s`.\n", name);

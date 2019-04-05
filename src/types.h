@@ -6,7 +6,6 @@
     struct Word;
     struct Wordlist;
 
-
     enum Mode {
         Interpret_Mode = 0,
         Compiler_Mode = 1,
@@ -15,10 +14,11 @@
     typedef struct {
         struct Stack *stack;
         struct RStack *rstack;
-        struct Word *last_defined_word;
+        //struct Word *last_defined_word;
         enum Mode mode;
         FILE *stream;
         struct Wordlist *wl;
+        struct Word **running;
     } Metadata;
 
     void i_docolon(struct Word *word, Metadata *md);
@@ -47,8 +47,11 @@
     typedef struct Word {
         Interpreter interpreter;
         char *name;
-        Func fn;
         bool immediate;
+        union {
+            Func fn;
+            struct Word **def;
+        };
     } Word;
 
     Cell pop_Stack(Stack* stack);

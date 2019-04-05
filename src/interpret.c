@@ -23,8 +23,9 @@ void load_file(Metadata *md, char *path){
 void repl(Metadata *md){
     char *word;
     enum Type type;
+    Word *n = get_xt_from_word(md->wl, "none");
     while(true){
-        //push(RStack)(md->rstack, (Word**)&none);
+        md->running = &n;
         word = get_word(md->stream);
         //puts("word got");
         type = classify_word(word);
@@ -32,9 +33,9 @@ void repl(Metadata *md){
             case Default: {
                 Word *fn = get_xt_from_word(md->wl, word);
                 if(fn != NULL){
-                    push(RStack)(md->rstack, &fn);
-                    execute(md);
-                    //fn->interpreter(fn, md);
+                    //push(RStack)(md->rstack, &fn);
+                    //execute(md);
+                    fn->interpreter(fn, md);
                 }
             }
                 break;
