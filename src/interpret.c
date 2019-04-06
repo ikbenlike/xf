@@ -23,7 +23,9 @@ void load_file(Metadata *md, char *path){
 void repl(Metadata *md){
     char *word;
     enum Type type;
-    Word *n = get_xt_from_word(md->wl, "none");
+    Word *n = get_xt_from_word(md->wl, "nothing");
+    Word **rn = calloc(2, sizeof(Word*));
+    rn[1] = n;
     while(true){
         md->running = &n;
         word = get_word(md->stream);
@@ -35,7 +37,10 @@ void repl(Metadata *md){
                 if(fn != NULL){
                     //push(RStack)(md->rstack, &fn);
                     //execute(md);
-                    fn->interpreter(fn, md);
+                    //fn->interpreter(fn, md);
+                    rn[0] = fn;
+                    md->running = rn;
+                    word_interpreters(md);
                 }
             }
                 break;

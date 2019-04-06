@@ -11,6 +11,13 @@
         Compiler_Mode = 1,
     };
 
+    enum Interpreters {
+        i_docol = 0,
+        i_liter = 1,
+        i_primi = 2,
+        i_nothn = 3,
+    };
+
     typedef struct {
         struct Stack *stack;
         struct RStack *rstack;
@@ -45,7 +52,7 @@
     } RStack;
 
     typedef struct Word {
-        Interpreter interpreter;
+        enum Interpreters interpreter;
         char *name;
         bool immediate;
         union {
@@ -59,9 +66,10 @@
     Cell pick(Stack *stack, Cell n);
     Word **pop_RStack(RStack *stack);
     RStack *push_RStack(RStack *stack, Word **fn);
-    Word *make_word(char *name, Func fn, Interpreter interpreter);
+    Word *make_word(char *name, Func fn, enum Interpreters interpreter);
+    void word_interpreters(Metadata *md);
 
-#   define MAKE_WORD(NAME, FN) make_word(NAME, (Func)FN, &i_docolon)
-#   define MAKE_PRIM(NAME, FN) make_word(NAME, FN, &i_primitive)
+#   define MAKE_WORD(NAME, FN) make_word(NAME, (Func)FN, i_docol)
+#   define MAKE_PRIM(NAME, FN) make_word(NAME, FN, i_primi)
 
 #endif

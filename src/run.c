@@ -42,7 +42,7 @@
    JP (W)      jump to the address in the W register
 */
 
-void execute(Metadata *md){
+/*void execute(Metadata *md){
     Word *w = *md->running++;
     w->interpreter(w, md);
-}
+}*/

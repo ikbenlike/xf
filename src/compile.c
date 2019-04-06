@@ -30,7 +30,7 @@ bool word_is_primitive(Wordlist *wl, char *word){
         printf("Invalid {%s} word not primitive\n", word);
         return false;
     }
-    return (w->interpreter == &i_primitive);
+    return (w->interpreter == i_primi);
 }
 
 Funcvector *init_fv(size_t size){
@@ -108,7 +108,7 @@ Funcvector *handle_number(Metadata *md, Funcvector *fv, char *name, char *word){
         return NULL;
     }*/
     Word *w = calloc(1, sizeof(Word));
-    w->interpreter = &i_literal;
+    w->interpreter = i_liter;
     w->fn = (Func)atoll(word);
     Word **wp = calloc(1, sizeof(Word*));
     wp[0] = w;
